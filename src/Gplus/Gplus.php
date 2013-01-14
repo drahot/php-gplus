@@ -1,12 +1,12 @@
 <?php
 
-namespace GPlus;
+namespace Gplus;
 
 /**
  * 
  * @author drahot
  */
-class GPlus
+class Gplus
 {
 
     private $client;

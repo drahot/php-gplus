@@ -1,6 +1,6 @@
 <?php
 
-namespace GPlus;
+namespace Gplus;
 
 use Goutte\Client as GoutteClient;
 

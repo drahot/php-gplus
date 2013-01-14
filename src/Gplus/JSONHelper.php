@@ -1,5 +1,7 @@
 <?php
 
+namespace Gplus;
+
 /**
  * JSON Helper Function Class
  * @author drahot

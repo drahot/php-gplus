@@ -7,7 +7,7 @@
         "fabpot/goutte": "0.1.*"
     },
     "autoload": {
-        "psr-0": { "GPlus": "src" }
+        "psr-0": { "Gplus": "src" }
     }
 }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace GPlus;
+namespace Gplus;
 
 class Hot extends PostData
 {
