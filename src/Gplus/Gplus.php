@@ -104,7 +104,7 @@ class Gplus
             'time'  => date('Uu'),
             'at'    => $this->sendId,
         );
-        $this->client->getGPlusData($this, "notifications", "updatelastreadtime", array(), false, $post);
+        $this->client->getGplusData($this, "notifications", "updatelastreadtime", array(), false, $post);
 
         foreach ($jsonData as $data) {
             if ($data[0] === 'on.nr') {

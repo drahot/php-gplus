@@ -124,7 +124,7 @@ class Client
 			'poll' 	=> 'false',
 			'pid'	=> '119',
 		);
-		$content = $this->getGPlusData($gplus, 'n', 'guc', $params);
+		$content = $this->getGplusData($gplus, 'n', 'guc', $params);
 		$jsonData = JSONHelper::load($content);
 		if ($jsonData) {
 			foreach ($jsonData as $data) {
@@ -136,7 +136,7 @@ class Client
 		return 0
 	}
 
-	public function getGPlusData(
+	public function getGplusData(
 		GPlus $gplus, $type, $function, array $params, $useSlash = false, array $postData = array()
 	){
 		$slash = $useSlash ? '/' : '';
