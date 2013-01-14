@@ -1,13 +1,8 @@
-# Bootstrap
-app/bootstrap*
-
-# Symfony directories
+==
+.DS_Store
 vendor/*
-*/logs/*
-*/cache/*
-web/uploads/*
-web/bundles/*
-
-# Configuration files
-app/config/parameters.ini
-app/config/parameters.yml
+composer.phar
+composer.lock
+*.sublime-project
+*.sublime-workspace
+==
