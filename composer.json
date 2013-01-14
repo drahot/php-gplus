@@ -1,0 +1,13 @@
+{
+    "name": "drahot/Gplus",
+    "description": "Google Plus Direct Access Library For PHP.",
+    "keywords": ["bing"],
+    "require": {
+        "php": ">=5.3.3",
+        "fabpot/goutte": "0.1.*"
+    },
+    "autoload": {
+        "psr-0": { "GPlus": "src" }
+    }
+}
+
