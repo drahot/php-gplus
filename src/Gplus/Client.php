@@ -288,4 +288,30 @@ class Client
 		return JSONHelper::load($content);
 	}
 
+
+	public function getStreamData($limt = 20)
+	{
+		return $this->getHotNodeData(null, $limit);
+	}
+
+	public function getStreamNodeData($node, $limit = 20)
+	{
+		$sp = sprintf(
+			'[1,2,null,null,null,%s,null,"social.google.com",[],null,null,null,null,null,null,[]]',
+			$limit
+		);
+		$params = array(
+			"sp"		=> $sp,
+			"hl"		=> "ja",
+			"_reqid"	=> $this->getRequestId(),
+			"rt"		=> "j",
+		);
+ 		if ($node) {
+	   		$params["ct"] = $node;
+		}
+		$this->doRequest('GET', $this->urls['activity'], $params);
+		$content = $this->client->getResponse()->getContent();
+		return JSONHelper::load($content);
+	}
+
 }

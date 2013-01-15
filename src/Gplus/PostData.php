@@ -12,11 +12,6 @@ abstract class PostData
 	private $gplus = null;
 	private $postJSON = null;
 	private $node = null;
-	// private $num = 0;
-	// private $mode = null;
-	// private $query = null;
-	// private $range = null;
-	// private $type = null;
 
 	public function __construct(
 		GPlus $gplus, 
@@ -47,56 +42,6 @@ abstract class PostData
 	{
 		$this->ndoe = $node;
 	}
-
-	// public function getNum()
-	// {
-	// 	return $this->node;
-	// }
-
-	// public function setNum($num)
-	// {
-	// 	$this->num = $num;
-	// }
-
-	// public function getQuery()
-	// {
-	// 	return $this->query;
-	// }
-
-	// public function setQuery($query)
-	// {
-	// 	$this->query = $query;
-	// }
-
-	// public function getMode()
-	// {
-	// 	return $this->mode;
-	// }
-
-	// public function setMode($mode)
-	// {
-	// 	$this->mode = $mode;
-	// }
-
-	// public function getRange()
-	// {
-	// 	return $this->range;
-	// }
-
-	// public function setRange($range)
-	// {
-	// 	$this->range = $range;
-	// }
-
-	// public function getType()
-	// {
-	// 	return $this->type;	
-	// }
-
-	// public function setType($type)
-	// {
-	// 	$this->type = $type;
-	// }
 
 	public function getPostCount()
 	{

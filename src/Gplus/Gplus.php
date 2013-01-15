@@ -77,9 +77,9 @@ class Gplus
      * @param string $postId 
      * @return GPlus\Comment
      */
-    public function createComment($postId)
+    public function getComment($postId)
     {
-        $postData = $this->getClient()->getCommentData($postId);
+        $postData = $this->client->getCommentData($postId);
         if (is_array($postData) && count($postData) > 0) {
         foreach ($postData[0] as $data) {
             if ($data[0] === "os.u") {
@@ -93,7 +93,7 @@ class Gplus
      * Description
      * @return GPlus\Notify
      */
-    public function createNotify()
+    public function getNotify()
     {
         $jsonData = $this->usePage 
                   ? $this->client->getNotifyPageData($this->userId)
@@ -104,7 +104,14 @@ class Gplus
             'time'  => date('Uu'),
             'at'    => $this->sendId,
         );
-        $this->client->getGplusData($this, "notifications", "updatelastreadtime", array(), false, $post);
+        $this->client->getGplusData(
+            $this, 
+            "notifications", 
+            "updatelastreadtime", 
+            array(), 
+            false, 
+            $post
+        );
 
         foreach ($jsonData as $data) {
             if ($data[0] === 'on.nr') {
@@ -114,7 +121,7 @@ class Gplus
                 foreach ($data[1][0] as $row) {
                     $notifyData[] = isset($row[2][0][1][0]) ? $row[2][0][1][0] : array();
                     $postIdData[] = isset($row[11]) ? $row[11] : '';
-                    $postData[] = isset($row[18][0][0]) ? $row[11] : array();
+                    $postData[] = isset($row[18][0][0]) ? $row[18][0][0] : array();
                 }
                 return new Notify($this, $postData, $notifyData, $postIdData);
             }
@@ -128,42 +135,68 @@ class Gplus
      * @param type $limit 
      * @return type
      */
-    public function createActivity($node = null, $limit = 20)
+    public function getActivity($node = null, $limit = 20)
     {
         if ($node) {
             $jsonData = $this->client->getActivityNodeData($node, $this->userId, $limit);
         } else {
             $jsonData = $this->client->getActivityData($this->userId, $limit);
         }
-        if (count($jsonData) > 0)  {
-            foreach ($jsonData[0] as $data) {
-                if ($data[0] === "os.nu") {
-                    $postData = $data[1][0];
-                    $node = isset($data[1][1]) ? $data[1][1] : "";
-                    return new Activity($this, $posData, $node);
-                }
-            }
+        list($postData, $node) = $this->getPostDataAndNode($jsonData);
+        if ($postData) {
+            return new Activity($this, $postData, $node);
         }
         return null;
     }
     
-    public function createHot($node = null, $limit = 20)
+    public function getHot($node = null, $limit = 20)
     {
         if ($node) {
-            $jsonData = $this->client->getHotNodeData($node, $this->userId, $limit);
+            $jsonData = $this->client->getHotNodeData($node, $limit);
         } else {
-            $jsonData = $this->client->getHotData($this->userId, $limit);
+            $jsonData = $this->client->getHotData($limit);
         }
-        if (count($jsonData) > 0)  {
+        list($postData, $node) = $this->getPostDataAndNode($jsonData);
+        if ($postData) {
+            return new Hot($this, $postData, $node);
+        }
+        return null;
+    }  
+
+    /**
+     * Description
+     * @param type $node 
+     * @param type $limit 
+     * @return type
+     */
+    public function getStream($node = null, $limit = 20)
+    {
+        if ($node) {
+            $jsonData = $this->client->getStreamNodeData($node, $limit);
+        } else {
+            $jsonData = $this->client->getStreamData($limit);
+        }
+        list($postData, $node) = $this->getPostDataAndNode($jsonData);
+        if ($postData) {
+            return new Stream($this, $postData, $node);
+        }
+        return null;
+    }
+
+    private function getPostDataAndNode(array $jsonData)
+    {
+        $postData   = null;
+        $node       = null;
+        if ($jsonData) {
             foreach ($jsonData[0] as $data) {
                 if ($data[0] === "os.nu") {
                     $postData = $data[1][0];
                     $node = isset($data[1][1]) ? $data[1][1] : "";
-                    return new Hot($this, $posData, $node);
+                    break;
                 }
             }
         }
-        return null;
-    }  
+        return array($postData, $node);
+    }
 
 }

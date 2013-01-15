@@ -9,17 +9,21 @@ namespace Gplus;
 class Notify extends PostData
 {
 	
-	const NOTIFY_TYPE_MYCOMMENT = 1;
+	const NOTIFY_TYPE_MYCOMMENT 	= 1;
 
-	const NOTIFY_TYPE_MENTION = 2;
+	const NOTIFY_TYPE_MENTION 		= 2;
 
-	const NOTIFY_TYPE_PLUSONE = 3;
+	const NOTIFY_TYPE_PLUSONE 		= 3;
 
-	const NOTIFY_TYPE_CIRCLEIN = 4;
+	const NOTIFY_TYPE_CIRCLEIN 		= 4;
 
-	const NOTIFY_TYPE_OTHERCOMMENT = 3;
+	const NOTIFY_TYPE_OTHERCOMMENT 	= 5;
+
+	const SEX_TYPE_MALE 			= 1;
+
+	const SEX_TYPE_FEMALE 			= 2;
 	
-	const NOTIFY_TYPE_MENTION = 5;
+	const SEX_TYPE_OTHER 			= 3;
 
 	private $typeTable = array(
         2 	=> self::NOTIFY_TYPE_MYCOMMENT,
@@ -110,3 +114,14 @@ class Notify extends PostData
 	{
 		return isset($this->notifyData[$row][2][2]) ? "http:".  $this->notifyData[$row][2][2] : "";
 	}	
+
+	public function getSex($row = 0)
+	{
+		$sex = isset($this->notifyData[$row][2][2]) ? $this->notifyData[$row][2][2] : "";
+		if ($sex === "male") {
+			return self::SEX_TYPE_MALE;
+		} elseif ($sex === "female") {
+			return self::SEX_TYPE_FEMALE;
+		}
+		return self::SEX_TYPE_OTHER;
+	}
