@@ -26,6 +26,10 @@ class Client
         "activity"      => "https://plus.google.com/_/stream/getactivities/",
     );
 
+    /**
+     * Description
+     * @return void
+     */
     public function __construct()
     {
         $this->client = new GoutteClient(
@@ -33,6 +37,12 @@ class Client
         );
     }
 
+    /**
+     * Description
+     * @param type $mailAddress 
+     * @param type $password 
+     * @return type
+     */
     public function doLogin($mailAddress, $password)
     {
         $crawler = $this->doRequest('GET', $this->urls['login']);
@@ -109,6 +119,13 @@ class Client
         );
     }
 
+    /**
+     * Description
+     * @param type $method 
+     * @param type $uri 
+     * @param type array $parameters 
+     * @return type
+     */
     public function doRequest($method, $uri, array $parameters = array())
     {
         return $this->client->request($method, $uri, $parameters);
@@ -136,6 +153,16 @@ class Client
         return 0
     }
 
+    /**
+     * Description
+     * @param type GPlus $gplus 
+     * @param type $type 
+     * @param type $function 
+     * @param type array $params 
+     * @param type $useSlash 
+     * @param type array $postData 
+     * @return type
+     */
     public function getGplusData(
         GPlus $gplus, $type, $function, array $params, $useSlash = false, array $postData = array()
     ){
@@ -150,6 +177,15 @@ class Client
         return $this->client->getResponse()->getContent();
     }
 
+    /**
+     * Description
+     * @param type GPlus $gplus 
+     * @param type $type 
+     * @param type $functionUrl 
+     * @param type $isPage 
+     * @param type array $params 
+     * @return type
+     */
     protected function getFunctionUrl(GPlus $gplus, $type, $functionUrl, $isPage, array $params)
     {
         if ($isPage) {
@@ -172,6 +208,10 @@ class Client
         }
     }
 
+    /**
+     * Description
+     * @return type
+     */
     private function getRequestId()
     {
         $result = '';
@@ -222,7 +262,10 @@ class Client
     }
 
     /**
-     * 
+     * Description
+     * @param type $userId 
+     * @param type $limit 
+     * @return type
      */
     public function getActivityData($userId, $limit = 20)
     {
@@ -252,9 +295,7 @@ class Client
         if ($node) {
             $params["ct"] = $node;
         }
-        $this->doRequest('GET', $this->urls['activity'], $params);
-        $content = $this->client->getResponse()->getContent();
-        return JSONHelper::load($content);
+        return $this->requestActivity($params);
     }
 
     public function getHotData($limt = 20)
@@ -283,17 +324,25 @@ class Client
         if ($node) {
             $params["ct"] = $node;
         }
-        $this->doRequest('GET', $this->urls['activity'], $params);
-        $content = $this->client->getResponse()->getContent();
-        return JSONHelper::load($content);
+        return $this->requestActivity($params);
     }
 
-
+    /**
+     * Description
+     * @param type $limt 
+     * @return type
+     */
     public function getStreamData($limt = 20)
     {
-        return $this->getHotNodeData(null, $limit);
+        return $this->getStreamNodeData(null, $limit);
     }
 
+    /**
+     * Description
+     * @param type $node 
+     * @param type $limit 
+     * @return type
+     */
     public function getStreamNodeData($node, $limit = 20)
     {
         $sp = sprintf(
@@ -309,9 +358,18 @@ class Client
         if ($node) {
             $params["ct"] = $node;
         }
+        return $this->requestActivity($params);
+    }
+
+    /**
+     * Description
+     * @param type array $params 
+     * @return type
+     */
+    protected function requestActivity(array $params)
+    {
         $this->doRequest('GET', $this->urls['activity'], $params);
         $content = $this->client->getResponse()->getContent();
         return JSONHelper::load($content);
     }
-
 }
