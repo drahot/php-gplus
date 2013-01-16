@@ -24,6 +24,7 @@ class Client
         "pagenotify"    => "https://plus.google.com/b/%s/_/notifications/getnotificationsdata",
         "usernotify"    => "https://plus.google.com/_/notifications/getnotificationsdata",
         "activity"      => "https://plus.google.com/_/stream/getactivities/",
+        "search"        => "https://plus.google.com/_/s/query?_reqid=%s"
     );
 
     /**
@@ -361,6 +362,25 @@ class Client
         return $this->requestActivity($params);
     }
 
+    public function getSearchData($sendId, $query, $node, $mode, $range, $type)
+    {   
+        $data = array(
+            array($query, $mode, $type, array($range)),
+            "null",
+            ($node) ? array($node) : array(),
+        );
+        $json = JSONHelper::encode($data);
+        $params = array(
+            "srchrp"    => $json,
+            "at"        => $sendId,
+        );
+        $url = sprintf($this->urls['search'], $this->getRequestId());
+        $this->doRequest('GET', $url, $params);
+        $content = $this->client->getResponse()->getContent();
+        return JSONHelper::load($content);
+
+    }
+
     /**
      * Description
      * @param type array $params 
@@ -372,4 +392,7 @@ class Client
         $content = $this->client->getResponse()->getContent();
         return JSONHelper::load($content);
     }
+    
+
+
 }

@@ -9,6 +9,26 @@ namespace Gplus;
 class Gplus
 {
 
+    const SEARCH_MODE_ALL               = 1;
+
+    const SEARCH_MODE_PEOPLE_AND_PAGES  = 2;
+
+    const SEARCH_MODE_POSTS             = 3;
+
+    const SEARCH_MODE_SPARKS            = 4;
+
+    const SEARCH_MODE_HANGOUTS          = 5;
+
+    const SEARCH_RANGE_ALL              = 1;
+
+    const SEARCH_RANGE_CIRCLES          = 2;
+
+    const SEARCH_RANGE_ME               = 5;
+
+    const SEARCH_TYPE_BEST              = 1;
+
+    const SEARCH_TYPE_NEW               = 2;
+   
     private $client;
     private $mailAddress;
     private $password;
@@ -149,6 +169,12 @@ class Gplus
         return null;
     }
     
+    /**
+     * Description
+     * @param type $node 
+     * @param type $limit 
+     * @return type
+     */
     public function getHot($node = null, $limit = 20)
     {
         if ($node) {
@@ -183,6 +209,59 @@ class Gplus
         return null;
     }
 
+    /**
+     * Description
+     * @param type $query 
+     * @param type $node 
+     * @param type $mode 
+     * @param type $range 
+     * @param type $type 
+     * @return type
+     */
+    public function getSearch(
+        $query, 
+        $node = "",
+        $mode = self::SEARCH_MODE_ALL, 
+        $range = self::SEARCH_RANEG_ALL, 
+        $type = self::SEARCH_TYPE_NEW)
+    {
+        $modes = array(
+            self::SEARCH_MODE_ALL, 
+            self::SEARCH_MODE_PEOPLE_AND_PAGES,
+            self::SEARCH_MODE_POSTS, 
+            self::SEARCH_MODE_SPARKS, 
+            self::SEARCH_MODE_HANGOUTS
+        );
+        if (!in_array($mode, $modes){
+            throw new \InvalidArgumentException("Invalid mode parameter!");
+        }
+        $ranges = array(
+            self::SEARCH_RANGE_ALL, self::SEARCH_RANGE_CIRCLES, self::SEARCH_RANGE_ME
+        );
+        if (!in_array($range, $ranges))) {
+            throw new \InvalidArgumentException("Invalid range parameter!");
+        }
+        $types = array(self::SEARCH_TYPE_BEST, self::SEARCH_TYPE_NEW);
+        if (!in_array($type, $types)) {
+            throw new \InvalidArgumentException("Invalid range parameter!");
+        }
+
+        $jsonData = $this->client->getSearchData($this->sendId, $query, $node, $mode, $range, $type);
+        foreach ($jsonData as $data) {
+            if ($data[0] === "sp.sqr") {
+                $postData = $data[1][1][0][0];
+                $node = isset($data[1][1]) ? $data[1][1] : "";
+                return new Search($this, $postData, $node);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Description
+     * @param type array $jsonData 
+     * @return type
+     */
     private function getPostDataAndNode(array $jsonData)
     {
         $postData   = null;
