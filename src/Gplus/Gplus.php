@@ -259,6 +259,15 @@ class Gplus
 
     /**
      * Description
+     * @return type
+     */
+    public function getPost()
+    {
+        return new Post($this);
+    }
+
+    /**
+     * Description
      * @param type array $jsonData 
      * @return type
      */
