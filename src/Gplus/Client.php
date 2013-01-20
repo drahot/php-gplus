@@ -430,5 +430,4 @@ class Client
         return JSONHelper::decode($content);
     }
 
-
 }

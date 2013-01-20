@@ -55,9 +55,6 @@ final class JSONHelper
             }
 
             if ($strMode == 0) {
-                // echo $c, PHP_EOL;
-                // echo $c+2, PHP_EOL;
-                // echo substr($jsonStr, $c, 2), PHP_EOL;
                 if (in_array(substr($jsonStr, $c, 2), array(",,", "[,", ",]"))) {
                     $jsonStr = substr($jsonStr, 0, $c + 1) . '"null"'. substr($jsonStr, $c + 1);
                     $c += 2 + 4;
