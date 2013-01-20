@@ -17,14 +17,15 @@ class Client
         "login"         => "https://accounts.google.com/login",
         "loginAuth"     => "https://accounts.google.com/ServiceLoginAuth",
         "plus"          => "https://plus.google.com/",
-        "posts"         => "https://plus.google.com/u/0/%s/posts"
+        "posts"         => "https://plus.google.com/u/0/%s/posts",
         "page"          => "https://plus.google.com/b/%s/_/%s/%s",
         "user"          => "https://plus.google.com/_/%s/%s",
         "comment"       => "https://plus.google.com/_/stream/getactivity/",
         "pagenotify"    => "https://plus.google.com/b/%s/_/notifications/getnotificationsdata",
         "usernotify"    => "https://plus.google.com/_/notifications/getnotificationsdata",
         "activity"      => "https://plus.google.com/_/stream/getactivities/",
-        "search"        => "https://plus.google.com/_/s/query?_reqid=%s"
+        "search"        => "https://plus.google.com/_/s/query?_reqid=%s",
+        "upload1"       => "https://plus.google.com/_/upload/photos/resumable?authuser=0",
     );
 
     /**
@@ -151,7 +152,7 @@ class Client
                 }
             }
         }
-        return 0
+        return 0;
     }
 
     /**
@@ -168,8 +169,8 @@ class Client
         GPlus $gplus, $type, $function, array $params, $useSlash = false, array $postData = array()
     ){
         $slash = $useSlash ? '/' : '';
-        $url = $this->getFunctionUrl($gplus, $type, $functionUrl.$slash, $isPage, $params);
-
+        $url = $this->getFunctionUrl($gplus, $type, $function.$slash, $gplus->usePage(), $params);
+        echo $url, PHP_EOL;
         if (count($postData) > 0) {
             $this->doRequest('POST', $url, $postData);
         } else {
@@ -213,7 +214,7 @@ class Client
      * Description
      * @return type
      */
-    private function getRequestId()
+    public function getRequestId()
     {
         $result = '';
         foreach (range(1, 7) as $i) {
@@ -378,8 +379,25 @@ class Client
         $this->doRequest('GET', $url, $params);
         $content = $this->client->getResponse()->getContent();
         return JSONHelper::load($content);
-
     }
+
+    /**
+     * Description
+     * @param type $uploadData 
+     * @param type $uploadImage 
+     * @return type
+     */
+    public function uploadImage($uploadData, $uploadImage)
+    {
+        $this->client->request('POST', $this->urls['upload1'], array(), array(), array(), $uploadData);
+        $content = $this->client->getResponse()->getContent();
+        $resultData = JSONHelper::load($content);
+        $uploadUrl = $resultData["sessionStatus"]["externalFieldTransfers"][0]["formPostInfo"]["url"];
+        $this->client->setHeader("Content-Type", "application/octet-stream");
+        $this->client->setHeader("X-HTTP-Method-Override", "PUT");
+        $this->client->request('POST', $uploadUrl, array(), array($uploadImage));
+    }
+
 
     /**
      * Description
@@ -392,7 +410,6 @@ class Client
         $content = $this->client->getResponse()->getContent();
         return JSONHelper::load($content);
     }
-    
 
 
 }

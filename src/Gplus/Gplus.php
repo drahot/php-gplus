@@ -35,6 +35,8 @@ class Gplus
     private $sendId;
     private $userId;    
     private $usePageId;
+    private $isLockComment = false;
+    private $isLockShare = false;
 
     public function __construct(
         Client $client, 
@@ -92,18 +94,39 @@ class Gplus
         return $this->client;
     }
 
+    public function isLockComment()
+    {
+        return $this->isLockComment;
+    }
+
+    public function setLockComment($isLockComment)
+    {
+        $this->isLockComment = $isLockComment;        
+    }
+    
+    public function isLockShare()
+    {
+        return $this->isLockShare;
+    }
+
+    public function seLockShare($isLockShare)
+    {
+        $this->isLockShare = $isLockShare;
+    }
+
     /**
      * Description
      * @param string $postId 
-     * @return GPlus\Comment
+     * @return Gplus\Comment
      */
     public function getComment($postId)
     {
         $postData = $this->client->getCommentData($postId);
         if (is_array($postData) && count($postData) > 0) {
-        foreach ($postData[0] as $data) {
-            if ($data[0] === "os.u") {
-                return new Comment($this, array($data[1]));
+            foreach ($postData[0] as $data) {
+                if ($data[0] === "os.u") {
+                    return new Comment($this, array($data[1]));
+                }
             }
         }
         return null;
@@ -111,13 +134,13 @@ class Gplus
 
     /**
      * Description
-     * @return GPlus\Notify
+     * @return Gplus\Notify
      */
     public function getNotify()
     {
         $jsonData = $this->usePage 
                   ? $this->client->getNotifyPageData($this->userId)
-                  : $this->client->getUserPageData()
+                  : $this->client->getUserPageData();
 
         // 通知データを確認済みにする。
         $post = array(
@@ -232,13 +255,13 @@ class Gplus
             self::SEARCH_MODE_SPARKS, 
             self::SEARCH_MODE_HANGOUTS
         );
-        if (!in_array($mode, $modes){
+        if (!in_array($mode, $modes)) {
             throw new \InvalidArgumentException("Invalid mode parameter!");
         }
         $ranges = array(
             self::SEARCH_RANGE_ALL, self::SEARCH_RANGE_CIRCLES, self::SEARCH_RANGE_ME
         );
-        if (!in_array($range, $ranges))) {
+        if (!in_array($range, $ranges)) {
             throw new \InvalidArgumentException("Invalid range parameter!");
         }
         $types = array(self::SEARCH_TYPE_BEST, self::SEARCH_TYPE_NEW);
