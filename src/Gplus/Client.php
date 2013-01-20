@@ -5,11 +5,15 @@ namespace Gplus;
 use Goutte\Client as GoutteClient;
 
 /**
- * 
+ * Gplus Access Client
  * @author drahot
  */
 class Client
 {
+    /**
+     * HTTP USER AGENT
+     * @var string
+     */
     const HTTP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/23.0.1271.101 Safari/535.7';
 
     private $client;
@@ -29,7 +33,7 @@ class Client
     );
 
     /**
-     * Description
+     * Constructor
      * @return void
      */
     public function __construct()
@@ -40,14 +44,14 @@ class Client
     }
 
     /**
-     * Description
-     * @param type $mailAddress 
-     * @param type $password 
-     * @return type
+     * Google Plus Login
+     * @param string $mailAddress 
+     * @param string $password 
+     * @return void
      */
-    public function doLogin($mailAddress, $password)
+    public function login($mailAddress, $password)
     {
-        $crawler = $this->doRequest('GET', $this->urls['login']);
+        $crawler = $this->request('GET', $this->urls['login']);
         $dsh = $crawler->filter('#dsh')->attr('value');
         $GALX = $crawler->filter('input[name=GALX]')->attr('value');
         $params = array(
@@ -66,19 +70,19 @@ class Client
             'rmShown'           => '1',
             '_utf8'             => '&#9731;',
         );
-        $this->doRequest('POST', $this->urls['loginAuth'], $params);
+        $this->request('POST', $this->urls['loginAuth'], $params);
         if ($this->client->getRequest()->getUri() === $this->urls['loginAuth']) {
             throw new Exception("Invalid Login!");
         }
     }
 
     /**
-     * Description
+     * Get User Data
      * @return array
      */
-    public function doPlus()
+    public function getUserData()
     {
-        $this->doRequest('GET', $this->urls['plus']);
+        $this->request('GET', $this->urls['plus']);
         if ($this->client->getRequest()->getUri() !== $this->urls['plus']) {
             throw new Exception("Google Plus cannot Access!");
         }
@@ -98,14 +102,14 @@ class Client
     }
 
     /**
-     * Description
+     * Get Last Post Data
      * @param string $userId 
      * @return array
      */
     public function getLastPostData($userId)
     {
         $url = sprintf($this->urls['posts'], $userId);
-        $this->doRequest('GET', $url);
+        $this->request('GET', $url);
         $content = $this->client->getResponse()->getContent();
         $postId = '';
         if (preg_match('/\"(.*)\",\"\",\"s:updates:esshare\"/', $content, $matches)) {
@@ -122,20 +126,21 @@ class Client
     }
 
     /**
-     * Description
-     * @param type $method 
-     * @param type $uri 
-     * @param type array $parameters 
-     * @return type
+     * Request
+     * @param string $method 
+     * @param string $uri 
+     * @param array $parameters 
+     * @return string
      */
-    public function doRequest($method, $uri, array $parameters = array())
+    public function request($method, $uri, array $parameters = array())
     {
         return $this->client->request($method, $uri, $parameters);
     }
+
     /**
-     * Description
-     * @param type GPlus $gplus 
-     * @return type
+     * Get Notify Count
+     * @param GPlus $gplus 
+     * @return int
      */
     public function getNotifyCount(GPlus $gplus)
     {
@@ -144,7 +149,7 @@ class Client
             'pid'   => '119',
         );
         $content = $this->getGplusData($gplus, 'n', 'guc', $params);
-        $jsonData = JSONHelper::load($content);
+        $jsonData = JSONHelper::decode($content);
         if ($jsonData) {
             foreach ($jsonData as $data) {
                 if ($data[0] === "on.uc") {
@@ -156,37 +161,36 @@ class Client
     }
 
     /**
-     * Description
-     * @param type GPlus $gplus 
-     * @param type $type 
-     * @param type $function 
-     * @param type array $params 
-     * @param type $useSlash 
-     * @param type array $postData 
-     * @return type
+     * Get Gplus Data
+     * @param GPlus $gplus 
+     * @param string $type 
+     * @param string $function 
+     * @param string array $params 
+     * @param bool $useSlash 
+     * @param array $postData 
+     * @return string
      */
     public function getGplusData(
         GPlus $gplus, $type, $function, array $params, $useSlash = false, array $postData = array()
     ){
         $slash = $useSlash ? '/' : '';
         $url = $this->getFunctionUrl($gplus, $type, $function.$slash, $gplus->usePage(), $params);
-        echo $url, PHP_EOL;
         if (count($postData) > 0) {
-            $this->doRequest('POST', $url, $postData);
+            $this->request('POST', $url, $postData);
         } else {
-            $this->doRequest('GET', $url);
+            $this->request('GET', $url);
         }
         return $this->client->getResponse()->getContent();
     }
 
     /**
-     * Description
-     * @param type GPlus $gplus 
-     * @param type $type 
-     * @param type $functionUrl 
-     * @param type $isPage 
-     * @param type array $params 
-     * @return type
+     * Get Function Url
+     * @param GPlus $gplus 
+     * @param string $type 
+     * @param string $functionUrl 
+     * @param boool $isPage 
+     * @param array $params 
+     * @return string
      */
     protected function getFunctionUrl(GPlus $gplus, $type, $functionUrl, $isPage, array $params)
     {
@@ -211,8 +215,8 @@ class Client
     }
 
     /**
-     * Description
-     * @return type
+     * Get Request Id
+     * @return string
      */
     public function getRequestId()
     {
@@ -234,48 +238,48 @@ class Client
             'updateId' => $postId,
             '_reqid' => $this->getRequestId(),
         );
-        $this->doRequest('GET', $this->urls['comment'], $params);
+        $this->request('GET', $this->urls['comment'], $params);
         $content = $this->client->getResponse()->getContent();
-        return JSONHelper::load($content);
+        return JSONHelper::decode($content);
     }
 
     /**
-     * Description
+     * Get Notify Page Data
      * @param string $userId 
      * @return array
      */
     public function getNotifyPageData($userId)
     {
         $url = sprintf($this->urls['pagenotify'], $userId);
-        $this->doRequest('GET', $url);
+        $this->request('GET', $url);
         $content = $this->client->getResponse()->getContent();
-        return JSONHelper::load($content);
+        return JSONHelper::decode($content);
    }
     
     /**
-    * Description
-    * @return type
-    */   
+     * Get Notify User Data
+     * @return array
+     */   
     public function getNotifyUserData()
     {
-        $this->doRequest('GET', $this->urls['pagenotify']);
+        $this->request('GET', $this->urls['pagenotify']);
         $content = $this->client->getResponse()->getContent();
-        return JSONHelper::load($content);
+        return JSONHelper::decode($content);
     }
 
     /**
-     * Description
-     * @param type $userId 
-     * @param type $limit 
-     * @return type
+     * Get Activity Data
+     * @param string $userId 
+     * @param int $limit 
+     * @return array
      */
     public function getActivityData($userId, $limit = 20)
     {
-        return $this->getActivityNode(null, $userId, $limit);
+        return $this->getActivityNodeData(null, $userId, $limit);
     }
 
     /**
-     * Description
+     * Get Activity Node Data
      * @param string $node 
      * @param string $userId 
      * @param int $limit 
@@ -284,7 +288,7 @@ class Client
     public function getActivityNodeData($node, $userId, $limit = 20)
     {
         $sp = sprintf(
-            "%5B1%2C2%2C%22%s%22%2Cnull%2Cnull%2C%d%2Cnull%2C%22social%2Egoogle%2Ecom%22%2C%5B%5D%5D", 
+            '[1,2,"%s",null,null,%d,null,"social.google.com",[]]',
             $userId,
             $limit
         );
@@ -300,16 +304,21 @@ class Client
         return $this->requestActivity($params);
     }
 
-    public function getHotData($limt = 20)
+    /**
+     * Get Hot Data
+     * @param int $limit 
+     * @return array
+     */
+    public function getHotData($limit = 20)
     {
         return $this->getHotNodeData(null, $limit);
     }
 
     /**
-     * Description
-     * @param type $node 
-     * @param type $limit 
-     * @return type
+     * Get Hot Node Data
+     * @param string $node 
+     * @param int $limit 
+     * @return array
      */
     public function getHotNodeData($node, $limit = 20)
     {
@@ -330,20 +339,20 @@ class Client
     }
 
     /**
-     * Description
-     * @param type $limt 
-     * @return type
+     * Get Stream Data
+     * @param int $limit 
+     * @return array
      */
-    public function getStreamData($limt = 20)
+    public function getStreamData($limit = 20)
     {
         return $this->getStreamNodeData(null, $limit);
     }
 
     /**
-     * Description
-     * @param type $node 
-     * @param type $limit 
-     * @return type
+     * Get Stream Node Data
+     * @param string $node 
+     * @param int $limit 
+     * @return array
      */
     public function getStreamNodeData($node, $limit = 20)
     {
@@ -363,6 +372,16 @@ class Client
         return $this->requestActivity($params);
     }
 
+    /**
+     * Get Search Data
+     * @param string $sendId 
+     * @param string $query 
+     * @param string $node 
+     * @param int $mode 
+     * @param int $range 
+     * @param int $type 
+     * @return array
+     */
     public function getSearchData($sendId, $query, $node, $mode, $range, $type)
     {   
         $data = array(
@@ -376,39 +395,39 @@ class Client
             "at"        => $sendId,
         );
         $url = sprintf($this->urls['search'], $this->getRequestId());
-        $this->doRequest('GET', $url, $params);
+        $this->request('POST', $url, $params);
         $content = $this->client->getResponse()->getContent();
-        return JSONHelper::load($content);
+        return JSONHelper::decode($content);
     }
 
     /**
-     * Description
-     * @param type $uploadData 
-     * @param type $uploadImage 
-     * @return type
+     * Upload Image
+     * TODO Test
+     * @param array $uploadData 
+     * @param array $uploadImage 
+     * @return void
      */
     public function uploadImage($uploadData, $uploadImage)
     {
         $this->client->request('POST', $this->urls['upload1'], array(), array(), array(), $uploadData);
         $content = $this->client->getResponse()->getContent();
-        $resultData = JSONHelper::load($content);
+        $resultData = JSONHelper::decode($content);
         $uploadUrl = $resultData["sessionStatus"]["externalFieldTransfers"][0]["formPostInfo"]["url"];
         $this->client->setHeader("Content-Type", "application/octet-stream");
         $this->client->setHeader("X-HTTP-Method-Override", "PUT");
         $this->client->request('POST', $uploadUrl, array(), array($uploadImage));
     }
 
-
     /**
-     * Description
-     * @param type array $params 
-     * @return type
+     * Request Activity Url
+     * @param array $params 
+     * @return array
      */
     protected function requestActivity(array $params)
     {
-        $this->doRequest('GET', $this->urls['activity'], $params);
+        $this->request('POST', $this->urls['activity'], $params);
         $content = $this->client->getResponse()->getContent();
-        return JSONHelper::load($content);
+        return JSONHelper::decode($content);
     }
 
 

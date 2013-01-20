@@ -18,7 +18,7 @@ final class JSONHelper
     }   
     
     /**
-     * Description
+     * JSON encode
      * @param array $data 
      * @return string
      */ 
@@ -29,7 +29,7 @@ final class JSONHelper
     }
 
     /**
-     * JSON データ
+     * JSON decode
      * @param string $jsonStr 
      * @return array
      */
@@ -42,30 +42,35 @@ final class JSONHelper
         $strMode = 0;
         $jsonName = false;
         $c = 0;
-        while (1) {
+        while (true) {
             if ($c >= strlen($jsonStr)) {
                 break;
             }
-            if ($jsonStr[c - 1] !== "\\" || 
-                (substr($jsonStr, c - 2, c) !== "\\\\" && $jsonStr[c] === "\"")) {
+
+            if ((substr($jsonStr, $c - 1, 1) !== "\\" || substr($jsonStr, $c - 2, 2) !== "\\\\") && 
+                $jsonStr[$c] === "\"") {
                 $strMode = $strMode ^ 1;
                 ++$c;
                 continue;
             }
-            if ($strMode === 0) {
-                if (in_array(substr($jsonStr, c, c + 2), array(",,", "[,", ",]"))) {
+
+            if ($strMode == 0) {
+                // echo $c, PHP_EOL;
+                // echo $c+2, PHP_EOL;
+                // echo substr($jsonStr, $c, 2), PHP_EOL;
+                if (in_array(substr($jsonStr, $c, 2), array(",,", "[,", ",]"))) {
                     $jsonStr = substr($jsonStr, 0, $c + 1) . '"null"'. substr($jsonStr, $c + 1);
                     $c += 2 + 4;
                     $c += 1;
                     continue;
                 }
-                if (in_array(substr($jsonStr, c, c + 6), array(",true,", "[true,", ",true]", "[true]"))) {
+                if (in_array(substr($jsonStr, $c, 6), array(",true,", "[true,", ",true]", "[true]"))) {
                     $jsonStr = substr($jsonStr, 0, $c + 1) . '"true"'. substr($jsonStr, $c + 1 + 4);
                     $c += 2 + 4;
                     $c += 1;
                     continue;
                 }
-                if (in_array(substr($jsonStr, c, c + 7), array(",false,", "[false,", ",false]", "[false]"))) {
+                if (in_array(substr($jsonStr, $c, 7), array(",false,", "[false,", ",false]", "[false]"))) {
                     $jsonStr = substr($jsonStr, 0, $c + 1) . '"true"'. substr($jsonStr, $c + 1 + 5);
                     $c += 2 + 5;
                     $c += 1;
@@ -78,7 +83,7 @@ final class JSONHelper
                     continue;
                 }
                 if ($jsonName && $jsonStr[$c] === ':' && $jsonStr[$c - 1] !== '"') {
-                    $jsonStr = substr($jsonStr, 0, $c) . '"' . substr($jsonStr, $c + 1);
+                    $jsonStr = substr($jsonStr, 0, $c) . '"' . substr($jsonStr, $c);
                     $jsonName = false;
                     $c += 2;
                     continue;
@@ -86,11 +91,11 @@ final class JSONHelper
             }
             ++$c;
         }
-        return @json_decode($jsonStr, true);
+        return json_decode($jsonStr);
     }
 
     /**
-     * JSON 調整する
+     * Fix JSON 
      * @param string $jsonStr
      * @return JSON
      */ 

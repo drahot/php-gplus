@@ -2,18 +2,31 @@
 
 namespace Gplus;
 
+/**
+ * Post Class
+ * @author drahot
+ */
 class Post
 {
 
+	/**
+	 * Gplus Object
+	 * @var Gplus\Gplus
+	 */
 	private $gplus;
 
+	/**
+	 * Constructor
+	 * @param Gplus $gplus 
+	 * @return void
+	 */
 	public function __construct(Gplus $gplus)
 	{
 		$this->gplus = $gplus;
 	}
 
 	/**
-	 * Description
+	 * Post Function
 	 * @param array $postData 
 	 * @return void
 	 */
@@ -56,13 +69,13 @@ class Post
         $params = array(
         	"spam"	=> 20,
         );
-        return $this->gplus->getClient()->getGplusData(
+        $data = $this->gplus->getClient()->getGplusData(
         	$this->gplus, "sharebox", "post", array("spam"	=> 20), true, $data
         );
 	}
 
 	/**
-	 * Description
+	 * Edit Post Data
 	 * @param string $postId 
 	 * @param string $message 
 	 * @return void
@@ -79,13 +92,13 @@ class Post
         $params = array(
         	"spam" 		=> 20,
         );
-        return $this->gplus->getClient()->getGplusData(
+        $data = $this->gplus->getClient()->getGplusData(
         	$this->gplus, "stream", "edit", $params, true, $data
         );
 	}
 
 	/**
-	 * Description
+	 * Add Comment
 	 * @param string $postId 
 	 * @param string $message 
 	 * @return void
@@ -104,6 +117,13 @@ class Post
         );
 	}
 
+	/**
+	 * Reshare
+	 * @param string $postId 
+	 * @param string $message 
+	 * @param string $circleId 
+	 * @return void
+	 */
 	public function reshare($postId, $message, $circleId = "")
 	{
 		$data = array(
@@ -114,6 +134,18 @@ class Post
 		$this->post($data);
 	}
 
+	/**
+	 * Custom Link
+	 * @param string $message 
+	 * @param string $linkUrl 
+	 * @param string $linkTitle 
+	 * @param string $linkDescription 
+	 * @param string $linkThumbnail 
+	 * @param string $linkThumbnailType 
+	 * @param string $imageSizex 
+	 * @param string $imageSizey 
+	 * @return void
+	 */
 	public function customLink(
 		$message, 
 		$linkUrl = "//plus.google.com", 
@@ -137,6 +169,13 @@ class Post
 		$this->post($data);
 	}
 
+	/**
+	 * Post Message To Circle
+	 * TODO Test
+	 * @param string $message 
+	 * @param string $circleId 
+	 * @return void
+	 */
 	public function postMessage($message, $circleId = "")
 	{
 		$data = array(
@@ -146,6 +185,13 @@ class Post
 		$this->post($data);
 	}
 
+	/**
+	 * Post Message and image
+	 * TODO Test
+	 * @param string $message 
+	 * @param type array $uploadImage 
+	 * @return void
+	 */
 	public function postImage($message, array $uploadImage)
 	{
 		$data = array(
@@ -155,6 +201,12 @@ class Post
 		$this->post($data);
 	}
 
+	/**
+	 * Lock Comment
+	 * @param string $postId 
+	 * @param bool $lock 
+	 * @return void
+	 */
 	public function lockComment($postId, $lock = true)
 	{
         #pastdataを設定
@@ -168,6 +220,12 @@ class Post
         );
 	}
 
+	/**
+	 * Sparks Function
+	 * @param string $sparksId 
+	 * @param string $message 
+	 * @return void
+	 */
 	public function sparks($sparksId, $message)
 	{
 		$data = array(
@@ -178,7 +236,7 @@ class Post
 	}
 
 	/**
-	 * Description
+	 * Initialize Post Data
 	 * @param array $postData 
 	 * @return array
 	 */
@@ -210,7 +268,7 @@ class Post
 	}
 
 	/**
-	 * Description
+	 * Get Domain
 	 * @param array $postData 
 	 * @return string
 	 */
@@ -234,11 +292,11 @@ class Post
 	}
 
 	/**
-	 * Description
-	 * @param type array $postData 
-	 * @param type $name 
-	 * @param type $default 
-	 * @return type
+	 * Get Lock Value
+	 * @param array $postData 
+	 * @param $name 
+	 * @param bool $default 
+	 * @return bool
 	 */	
 	private function getLockValue(array $postData, $name, $default)	
 	{
@@ -249,7 +307,7 @@ class Post
 	}
 
 	/**
-	 * Description
+	 * Get Image MIME
 	 * @param array $postData 
 	 * @return string 
 	 */
@@ -282,7 +340,7 @@ class Post
 	}
 
 	/**
-	 * Description
+	 * Get Upload For ImageData
 	 * @param array $uploadImage 
 	 * @return string
 	 */
@@ -358,7 +416,7 @@ class Post
 	}
 
 	/**
-	 * Description
+	 * Get Scope Data
 	 * @param array $postData 
 	 * @param string $scopeType 
 	 * @param string $groupType 
@@ -394,11 +452,17 @@ class Post
             ),
 		);
 		$json = JSONHelper::encode($data);
-		// return substr($json, 1, -1);
 		return $json;
 	}
 
-	private function getLinkData()
+	/**
+	 * Get Link Data
+	 * @param array $postData 
+	 * @param string $domain 
+	 * @param string $imagemime 
+	 * @return string
+	 */
+	private function getLinkData(array $postData, $domain, $imagemime)
 	{
 		if (!empty($postData["linkimage"])) {
 			$linkImage1 = array("null", $postData["linkimage"], $postData["linktx"], $postData["linkty"]);
@@ -412,10 +476,10 @@ class Post
 				$linkImage2 = "null";
 			} else {
 				if (!empty($postData["linktitle"])) {
-				$linkImage2 = array(
-					array("null", "//s2.googleusercontent.com/s2/favicons". $domain, "null", "null"),
-					array("null", "//s2.googleusercontent.com/s2/favicons". $domain, "null", "null")
-				);
+					$linkImage2 = array(
+						array("null", "//s2.googleusercontent.com/s2/favicons". $domain, "null", "null"),
+						array("null", "//s2.googleusercontent.com/s2/favicons". $domain, "null", "null")
+					);
 				} else {
 					$linkImage2 = "null";
 				}
@@ -445,7 +509,7 @@ class Post
 			array(
  				JSONHelper::encode(
 	 				array(
-		 				"null", "null", "null", $postData["linkurl"], "null", $linkImage1,
+		 				"null", "null", "null", $postData["linktitle"], "null", $linkImage1,
 			 			"null", "null", "null", array(), "null", "null", "null", "null", "null", "null",
 						"null", "null", "null", "null", "null", $postData["linkdescription"], "null", "null",
 						array("null", $postData["linkurl"], "null", $postData["linktype"], "document"),
@@ -481,7 +545,7 @@ class Post
 	}
 
 	/**
-	 * Description
+	 * Get Post Data
 	 * @param array $postData 
 	 * @param string $linkData 
 	 * @param string $scopeData 

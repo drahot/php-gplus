@@ -3,28 +3,28 @@
 namespace Gplus;
 
 /**
- * 
+ * Notify Data Class
  * @author drahot
  */
 class Notify extends PostData
 {
     
+    /**
+     * Declare Constants
+     * @var int
+     */    
     const NOTIFY_TYPE_MYCOMMENT     = 1;
-
     const NOTIFY_TYPE_MENTION       = 2;
-
     const NOTIFY_TYPE_PLUSONE       = 3;
-
     const NOTIFY_TYPE_CIRCLEIN      = 4;
-
     const NOTIFY_TYPE_OTHERCOMMENT  = 5;
-
     const SEX_TYPE_MALE             = 1;
-
     const SEX_TYPE_FEMALE           = 2;
-    
     const SEX_TYPE_OTHER            = 3;
 
+    /**
+     * 
+     */
     private $typeTable = array(
         2   => self::NOTIFY_TYPE_MYCOMMENT,
         15  => self::NOTIFY_TYPE_MENTION,
@@ -35,13 +35,13 @@ class Notify extends PostData
     );
 
     /**
-     * 
+     * Notify Data
      * @var array
      */
     private $notifyData;
 
     /**
-     * 
+     * PostId Data
      * @var array
      */
     private $postIdData;
@@ -59,7 +59,6 @@ class Notify extends PostData
         $this->notifyData = $notifyData;
         $this->postIdData = $postIdData;
     }
-
 
     /**
      * Get Notify Data
@@ -82,7 +81,7 @@ class Notify extends PostData
     }
 
     /**
-     * Description
+     * Get User Name
      * @param int $row 
      * @return string
      */
@@ -92,7 +91,7 @@ class Notify extends PostData
     }   
 
     /**
-     * Description
+     * Get UserId
      * @param int $row 
      * @return string
      */
@@ -101,6 +100,11 @@ class Notify extends PostData
         return isset($this->notifyData[$row][2][1]) ? $this->notifyData[$row][2][1] : "";
     }   
 
+    /**
+     * Get PostId
+     * @param int $row 
+     * @return string
+     */
     public function getPostId($row = 0)
     {
         $postId = isset($this->postIdData[$row]) ? $this->postIdData[$row] : "";
@@ -110,11 +114,21 @@ class Notify extends PostData
         return $postId;
     }
 
+    /**
+     * Get Icon
+     * @param int $row 
+     * @return string
+     */
     public function getIcon($row = 0)
     {
         return isset($this->notifyData[$row][2][2]) ? "http:".  $this->notifyData[$row][2][2] : "";
     }   
 
+    /**
+     * Get Sex
+     * @param type $row 
+     * @return type
+     */
     public function getSex($row = 0)
     {
         $sex = isset($this->notifyData[$row][2][2]) ? $this->notifyData[$row][2][2] : "";
@@ -125,3 +139,5 @@ class Notify extends PostData
         }
         return self::SEX_TYPE_OTHER;
     }
+
+}

@@ -3,62 +3,104 @@
 namespace Gplus;
 
 /**
- * 
+ * Post Data Class 
  * @author drahot
  */
-abstract class PostData
+class PostData
 {
 
-    private $gplus = null;
-    private $postJSON = null;
-    private $node = null;
+    private $gplus      = null;
+    private $postData   = null;
+    private $node       = null;
 
-    public function __construct(
-        GPlus $gplus, 
-        array $postJSON, 
-        $node = null)
+    /**
+     * Constructor
+     * @param GPlus $gplus 
+     * @param array $postData 
+     * @param string $node 
+     * @return void
+     */
+    public function __construct(GPlus $gplus, array $postData, $node = null)
     {
-        $this->gplus = $gplus;
-        $this->postJSON = $postJSON;
-        $this->node = $node;
+        $this->gplus    = $gplus;
+        $this->postData = $postData;
+        $this->node     = $node;
     }
     
-    public function getPostJSON()
+    /**
+     * Get Post Data
+     * @return array
+     */    
+    public function getPostData()
     {
-        return $this->postJSON;
+        return $this->postData;
     }
 
-    public function setPostJSON(array $postJSON)
-    {
-        $this->postJSON = $postJSON;
-    }
-
+    /**
+     * Get Node
+     * @return string
+     */
     public function getNode()
     {
         return $this->node;
     }
 
-    public function setNode($node)
+    /**
+     * Get Count
+     * @return int
+     */
+    public function getCount()
     {
-        $this->ndoe = $node;
+        return count($this->postData);
     }
 
-    public function getPostCount()
+    /**
+     * Get UserId
+     * @param int $row 
+     * @return string
+     */
+    public function getUserId($row = 0)
     {
-        return count($this->postJSON);
+        if (is_array($this->postData)) {
+            return $this->getString($row, 16);
+        }
+        return "";
+    }
+
+    /**
+     * Get PostId
+     * @param int $row 
+     * @return string
+     */
+    public function getPostId($row = 0)
+    {
+        if (is_array($this->postData)) {
+            return $this->getString($row, 8);
+        }
+        return "";
     }
     
-    public function getPostUserName($row = 0)
+    /**
+     * Get Username
+     * @param int $row 
+     * @return string
+     */    
+    public function getUserName($row = 0)
     {
-        if (is_array($this->postJSON)) {
+        if (is_array($this->postData)) {
             return $this->getString($row, 3);
         }
         return "";
     }
 
-    public function getPostBody($row = 0)
+    /**
+     * Get Body
+     * @param int $row 
+     * @return string
+     */
+    public function getBody($row = 0)
     {
-        if (is_array($this->postJSON)) {
+        if (is_array($this->postData)) {
             $body = $this->getString($row, 47);
             if ($body !== "null") {
                 return $body;
@@ -68,26 +110,15 @@ abstract class PostData
         }
         return "";
     }
-
-    public function getPostUserId($row = 0)
-    {
-        if (is_array($this->postJSON)) {
-            return $this->getString($row, 16);
-        }
-        return "";
-    }
-
-    public function getPostId($row = 0)
-    {
-        if (is_array($this->postJSON)) {
-            return $this->getString($row, 8);
-        }
-        return "";
-    }
     
+    /**
+     * Get Reshare PostId
+     * @param int $row 
+     * @return string
+     */    
     public function getResharePostId($row = 0)
     {
-        if (is_array($this->postJSON)) {
+        if (is_array($this->postData)) {
             $postId = $this->getString($row, 39);
             if ($postId !== "null") {
                 return $postId; 
@@ -95,38 +126,30 @@ abstract class PostData
         }
         return "";
     }   
-
-    public function getCommentTotal($row = 0)
-    {
-        if (is_array($this->postJSON)) {
-            return intval($this->getString($row, 93));
-        }
-        return 0;
-    }
-
-    public function getCommentCount($row = 0)
-    {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][7]) && is_array($this->postJSON[$row][7])) {
-                return count($this->postJSON[$row][7]);
-            }
-        }
-        return 0;
-    }
     
+    /**
+     * Get Share Count
+     * @param int $row 
+     * @return int
+     */
     public function getShareCount($row = 0)
     {
-        if (is_array($this->postJSON)) {
+        if (is_array($this->postData)) {
             return intval($this->getString($row, 96));
         }
         return 0;
     }   
 
-    public function getPlusOneLength($row = 0)
+    /**
+     * Get PlusOne Count
+     * @param int $row 
+     * @return int
+     */
+    public function getPlusOneCount($row = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][73][16])) {
-                $plusOne = $this->postJSON[$row][73][16];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][73][16])) {
+                $plusOne = $this->postData[$row][73][16];
                 if ($plusOne !== "null") {
                     return intval($plusOne);
                 }
@@ -134,100 +157,183 @@ abstract class PostData
         }
         return 0;
     }
-    
-    public function getCommentUserName($row = 0, $col = 0)
+
+    /**
+     * Get Comment Total
+     * @param int $row 
+     * @return int
+     */
+    public function getCommentTotal($row = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][7][$col][1])) {
-                return $this->postJSON[$row][7][$col][1];
+        if (is_array($this->postData)) {
+            return intval($this->getString($row, 93));
+        }
+        return 0;
+    }
+
+    /**
+     * Get Comment Count
+     * @param int $row 
+     * @return int
+     */
+    public function getCommentCount($row = 0)
+    {
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][7]) && is_array($this->postData[$row][7])) {
+                return count($this->postData[$row][7]);
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Get Comment UserId
+     * @param int $row 
+     * @param int $commentRow 
+     * @return string
+     */
+    public function getCommentUserId($row = 0, $commentRow = 0)
+    {
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][7][$commentRow][6])) {
+                return $this->postData[$row][7][$commentRow][6];
+            }           
+        }
+        return "";
+    }
+
+    /**
+     * Get Comment Username
+     * @param int $row 
+     * @param int $commentRow 
+     * @return string
+     */    
+    public function getCommentUserName($row = 0, $commentRow = 0)
+    {
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][7][$commentRow][1])) {
+                return $this->postData[$row][7][$commentRow][1];
             }           
         }
         return "";
     }   
 
-    public function getCommentUserId($row = 0, $col = 0)
+    /**
+     * Get Comment Id
+     * @param int $row 
+     * @param int $commentRow 
+     * @return string
+     */
+    public function getCommentId($row = 0, $commentRow = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][7][$col][6])) {
-                return $this->postJSON[$row][7][$col][6];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][7][$commentRow][4])) {
+                return $this->postData[$row][7][$commentRow][4];
             }           
         }
         return "";
     }
 
-    public function getCommentId($row = 0, $col = 0)
+    /**
+     * Get Comment Body
+     * @param int $row 
+     * @param int $commentRow
+     * @return string
+     */
+    public function getCommentBody($row = 0, $commentRow = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][7][$col][4])) {
-                return $this->postJSON[$row][7][$col][4];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][7][$commentRow][2])) {
+                return $this->postData[$row][7][$commentRow][2];
             }           
         }
         return "";
     }
 
-    public function getCommentBody($row = 0, $col = 0)
-    {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][7][$col][2])) {
-                return $this->postJSON[$row][7][$col][2];
-            }           
-        }
-        return "";
-    }
-
+    /**
+     * Get Sparks Id
+     * @param int $row 
+     * @return string
+     */
     public function getSparksId($row = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][88])) {
-                return $this->postJSON[$row][88];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][88])) {
+                return $this->postData[$row][88];
             }           
         }
         return "";
     }
 
+    /**
+     * Get Sparks Title
+     * @param int $row 
+     * @return string
+     */
     public function getSparksTitle($row = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][11][0][3])) {
-                return $this->postJSON[$row][11][0][3];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][11][0][3])) {
+                return $this->postData[$row][11][0][3];
             }           
         }
         return "";
     }
 
+    /**
+     * Get Sparks Author
+     * @param int $row 
+     * @return string
+     */
     public function getSparksAuthor($row = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][82][2][3][0])) {
-                return $this->postJSON[$row][82][2][3][0];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][82][2][3][0])) {
+                return $this->postData[$row][82][2][3][0];
             }
         }
         return "";
     }
 
+    /**
+     * Get Sparks Description
+     * @param int $row 
+     * @return string
+     */
     public function getSparksDescription($row = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][11][0][21])) {
-                return $this->postJSON[$row][11][0][21];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][11][0][21])) {
+                return $this->postData[$row][11][0][21];
             }
         }
         return "";
     }
 
+    /**
+     * Get Sparks Link
+     * @param int $row 
+     * @return string
+     */
     public function getSparksLink($row = 0)
     {
-        if (is_array($this->postJSON)) {
-            if (isset($this->postJSON[$row][13])) {
-                return $this->postJSON[$row][13];
+        if (is_array($this->postData)) {
+            if (isset($this->postData[$row][13])) {
+                return $this->postData[$row][13];
             }
         }
         return "";
     }
 
+    /**
+     * Get Post Data 
+     * @param int $row 
+     * @param int $col 
+     * @return string
+     */
     protected function getString($row, $col)
     {
-        return (isset($this->postJSON[$row][$col])) ? $this->postJSON[$row][$col] : "";
+        return (isset($this->postData[$row][$col])) ? $this->postData[$row][$col] : "";
     }
 
 }

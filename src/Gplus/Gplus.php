@@ -3,32 +3,28 @@
 namespace Gplus;
 
 /**
- * 
+ * Gplus Class
  * @author drahot
  */
 class Gplus
 {
-
+    /**
+     * Declare constants 
+     */
     const SEARCH_MODE_ALL               = 1;
-
     const SEARCH_MODE_PEOPLE_AND_PAGES  = 2;
-
     const SEARCH_MODE_POSTS             = 3;
-
     const SEARCH_MODE_SPARKS            = 4;
-
     const SEARCH_MODE_HANGOUTS          = 5;
-
     const SEARCH_RANGE_ALL              = 1;
-
     const SEARCH_RANGE_CIRCLES          = 2;
-
     const SEARCH_RANGE_ME               = 5;
-
     const SEARCH_TYPE_BEST              = 1;
-
     const SEARCH_TYPE_NEW               = 2;
    
+    /**
+     * Declare instance variable 
+     */
     private $client;
     private $mailAddress;
     private $password;
@@ -38,6 +34,16 @@ class Gplus
     private $isLockComment = false;
     private $isLockShare = false;
 
+    /**
+     * Constructor
+     * @param Client $client 
+     * @param string $mailAddress 
+     * @param string $password 
+     * @param string $sendId 
+     * @param string $userId 
+     * @param bool $usePageId 
+     * @return void
+     */    
     public function __construct(
         Client $client, 
         $mailAddress, 
@@ -54,78 +60,18 @@ class Gplus
         $this->usePageId = $usePageId;
     }
 
-    public function getMailAddress()
-    {
-        return $this->mailAddress;
-    }
-
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    public function getSendId()
-    {
-        return $this->sendId;
-    }
-
-    public function getUserId()
-    {
-        return $this->userId;
-    }
-
-    public function usePage()
-    {
-        return $this->usePageId;
-    }
-
-    public function getLastPostData()
-    {
-        return $this->client->getLastPostData($this->userId);
-    }
-
-    public function getNotifyCount()
-    {
-        return $this->client->getNotifyCount($this);
-    }
-
-    public function getClient()
-    {
-        return $this->client;
-    }
-
-    public function isLockComment()
-    {
-        return $this->isLockComment;
-    }
-
-    public function setLockComment($isLockComment)
-    {
-        $this->isLockComment = $isLockComment;        
-    }
-    
-    public function isLockShare()
-    {
-        return $this->isLockShare;
-    }
-
-    public function seLockShare($isLockShare)
-    {
-        $this->isLockShare = $isLockShare;
-    }
-
     /**
-     * Description
+     * Get Comment Data
      * @param string $postId 
      * @return Gplus\Comment
      */
-    public function getComment($postId)
+    public function comment($postId)
     {
         $postData = $this->client->getCommentData($postId);
         if (is_array($postData) && count($postData) > 0) {
             foreach ($postData[0] as $data) {
                 if ($data[0] === "os.u") {
-                    return new Comment($this, array($data[1]));
+                    return new PostData($this, array($data[1]));
                 }
             }
         }
@@ -133,14 +79,18 @@ class Gplus
     }
 
     /**
-     * Description
+     * Get Notify Data
      * @return Gplus\Notify
      */
-    public function getNotify()
+    public function notify()
     {
-        $jsonData = $this->usePage 
+        $jsonData = $this->usePage() 
                   ? $this->client->getNotifyPageData($this->userId)
-                  : $this->client->getUserPageData();
+                  : $this->client->getNotifyUserData();
+
+        if (!$jsonData) {
+            return null;                        
+        }
 
         // 通知データを確認済みにする。
         $post = array(
@@ -173,12 +123,12 @@ class Gplus
     }
 
     /**
-     * Description
-     * @param type $node 
-     * @param type $limit 
-     * @return type
+     * Get Activity Data
+     * @param string $node 
+     * @param int $limit 
+     * @return Gplus\PostData
      */
-    public function getActivity($node = null, $limit = 20)
+    public function activity($node = null, $limit = 20)
     {
         if ($node) {
             $jsonData = $this->client->getActivityNodeData($node, $this->userId, $limit);
@@ -187,18 +137,18 @@ class Gplus
         }
         list($postData, $node) = $this->getPostDataAndNode($jsonData);
         if ($postData) {
-            return new Activity($this, $postData, $node);
+            return new PostData($this, $postData, $node);
         }
         return null;
     }
     
     /**
-     * Description
-     * @param type $node 
-     * @param type $limit 
-     * @return type
+     * Get Hot Data
+     * @param string $node 
+     * @param int $limit 
+     * @return Gplus\PostData
      */
-    public function getHot($node = null, $limit = 20)
+    public function hot($node = null, $limit = 20)
     {
         if ($node) {
             $jsonData = $this->client->getHotNodeData($node, $limit);
@@ -207,18 +157,18 @@ class Gplus
         }
         list($postData, $node) = $this->getPostDataAndNode($jsonData);
         if ($postData) {
-            return new Hot($this, $postData, $node);
+            return new PostData($this, $postData, $node);
         }
         return null;
     }  
 
     /**
-     * Description
-     * @param type $node 
-     * @param type $limit 
-     * @return type
+     * Get Stream Data
+     * @param string $node 
+     * @param int $limit 
+     * @return Gplus\PostData
      */
-    public function getStream($node = null, $limit = 20)
+    public function stream($node = null, $limit = 20)
     {
         if ($node) {
             $jsonData = $this->client->getStreamNodeData($node, $limit);
@@ -227,26 +177,26 @@ class Gplus
         }
         list($postData, $node) = $this->getPostDataAndNode($jsonData);
         if ($postData) {
-            return new Stream($this, $postData, $node);
+            return new PostData($this, $postData, $node);
         }
         return null;
     }
 
     /**
-     * Description
-     * @param type $query 
-     * @param type $node 
-     * @param type $mode 
-     * @param type $range 
-     * @param type $type 
-     * @return type
+     * Get Search
+     * @param string $query 
+     * @param string $node 
+     * @param int $mode 
+     * @param int $range 
+     * @param int $type 
+     * @return Gplus\Search
      */
-    public function getSearch(
+    public function search(
         $query, 
-        $node = "",
-        $mode = self::SEARCH_MODE_ALL, 
-        $range = self::SEARCH_RANEG_ALL, 
-        $type = self::SEARCH_TYPE_NEW)
+        $node   = "",
+        $mode   = self::SEARCH_MODE_ALL, 
+        $range  = self::SEARCH_RANGE_ALL, 
+        $type   = self::SEARCH_TYPE_NEW)
     {
         $modes = array(
             self::SEARCH_MODE_ALL, 
@@ -270,29 +220,31 @@ class Gplus
         }
 
         $jsonData = $this->client->getSearchData($this->sendId, $query, $node, $mode, $range, $type);
-        foreach ($jsonData as $data) {
-            if ($data[0] === "sp.sqr") {
-                $postData = $data[1][1][0][0];
-                $node = isset($data[1][1]) ? $data[1][1] : "";
-                return new Search($this, $postData, $node);
+        if ($jsonData) {
+            foreach ($jsonData as $data) {
+                if ($data[0] === "sp.sqr") {
+                    $postData = $data[1][1][0][0];
+                    $node = isset($data[1][1]) ? $data[1][1] : "";
+                    return new PostData($this, $postData, $node);
+                }
             }
         }
         return null;
     }
 
     /**
-     * Description
-     * @return type
+     * Get Post Object
+     * @return Gplus\Post
      */
-    public function getPost()
+    public function post()
     {
         return new Post($this);
     }
 
     /**
-     * Description
-     * @param type array $jsonData 
-     * @return type
+     * Get PostData And Node
+     * @param array $jsonData 
+     * @return array
      */
     private function getPostDataAndNode(array $jsonData)
     {
@@ -308,6 +260,116 @@ class Gplus
             }
         }
         return array($postData, $node);
+    }
+
+    /**
+     * Get MailAddress
+     * @return string
+     */    
+    public function getMailAddress()
+    {
+        return $this->mailAddress;
+    }
+
+    /**
+     * Get password
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * Get sendId
+     * @return string
+     */
+    public function getSendId()
+    {
+        return $this->sendId;
+    }
+
+    /**
+     * Get UserId
+     * @return type
+     */
+    public function getUserId()
+    {
+        return $this->userId;
+    }
+
+    /**
+     * Get UsePage
+     * @return bool
+     */
+    public function usePage()
+    {
+        return $this->usePageId;
+    }
+
+    /**
+     * Get Last Post Data
+     * @return array
+     */
+    public function getLastPostData()
+    {
+        return $this->client->getLastPostData($this->userId);
+    }
+
+    /**
+     * Get Notify Count
+     * @return type
+     */
+    public function getNotifyCount()
+    {
+        return $this->client->getNotifyCount($this);
+    }
+
+    /**
+     * Get Http Client
+     * @return type
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    /**
+     * Get Comment Lock
+     * @return bool
+     */
+    public function isLockComment()
+    {
+        return $this->isLockComment;
+    }
+
+    /**
+     * Set Comment Lock
+     * @param bool $isLockComment 
+     * @return void
+     */
+    public function setLockComment($isLockComment)
+    {
+        $this->isLockComment = $isLockComment;        
+    }
+    
+    /**
+     * Get Share Lock
+     * @return bool
+     */
+    public function isLockShare()
+    {
+        return $this->isLockShare;
+    }
+
+    /**
+     * Set Share Lock
+     * @param bool $isLockShare 
+     * @return void
+     */
+    public function seLockShare($isLockShare)
+    {
+        $this->isLockShare = $isLockShare;
     }
 
 }
