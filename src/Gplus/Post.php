@@ -110,7 +110,7 @@ class Post
             "clientId"          => "os". $postId . ":". date('Uu'),
             "text"              => $message,
             "timestamp_msec"    => date('Uu'),
-            "at"    => $this->gplus->getSendId(),
+            "at"                => $this->gplus->getSendId(),
         );
         $this->gplus->getClient()->getGplusData(
             $this->gplus, "stream", "comment", array("spam" => 20), true, $data
